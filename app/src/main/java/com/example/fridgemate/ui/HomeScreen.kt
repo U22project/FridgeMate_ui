@@ -37,10 +37,10 @@ fun HomeScreen(navController: NavController) {
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold
                 )
-                Icon(
-                    imageVector = Icons.Default.AccountCircle,
-                    contentDescription = "Profile"
-                )
+//                Icon(
+//                    imageVector = Icons.Default.AccountCircle,
+//                    contentDescription = "Profile"
+//                )
             }
 
             Spacer(modifier = Modifier.height(24.dp))
