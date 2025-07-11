@@ -11,6 +11,7 @@ import com.example.fridgemate.ui.RecipeListScreen
 import com.example.fridgemate.ui.RecipeDetailScreen
 import com.example.fridgemate.ui.InventoryScreen
 import com.example.fridgemate.ui.ExpiryScreen
+import com.example.fridgemate.ui.CameraScreen
 
 
 @Composable
@@ -24,6 +25,9 @@ fun FridgeMateNavGraph(navController: NavHostController) {
         }
         composable("search") {
             SearchScreen(navController = navController)
+        }
+        composable("CameraScreen") {
+            CameraScreen(navController = navController)
         }
         composable("shopping") {
             ShoppingListScreen(navController = navController)
