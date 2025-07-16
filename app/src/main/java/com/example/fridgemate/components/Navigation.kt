@@ -12,10 +12,14 @@ import com.example.fridgemate.ui.RecipeDetailScreen
 import com.example.fridgemate.ui.InventoryScreen
 import com.example.fridgemate.ui.ExpiryScreen
 import com.example.fridgemate.ui.CameraScreen
+import com.example.fridgemate.ui.EditFoodScreen
+
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.fridgemate.viewmodel.FridgeViewModel
 
 
 @Composable
-fun FridgeMateNavGraph(navController: NavHostController) {
+fun FridgeMateNavGraph(navController: NavHostController,fridgeViewModel: FridgeViewModel) {
     NavHost(
         navController = navController,
         startDestination = "home"
@@ -27,7 +31,9 @@ fun FridgeMateNavGraph(navController: NavHostController) {
             SearchScreen(navController = navController)
         }
         composable("CameraScreen") {
-            CameraScreen(navController = navController)
+            CameraScreen(navController = navController,
+                fridgeViewModel = fridgeViewModel
+            )
         }
         composable("shopping") {
             ShoppingListScreen(navController = navController)
@@ -43,6 +49,12 @@ fun FridgeMateNavGraph(navController: NavHostController) {
         }
         composable("expiry") {
             ExpiryScreen(navController = navController)
+        }
+        composable("edit_food") {
+            EditFoodScreen(
+                navController = navController,
+                fridgeViewModel = fridgeViewModel
+            )
         }
 
     }

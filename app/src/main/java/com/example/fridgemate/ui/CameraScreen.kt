@@ -18,6 +18,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.NavController.*
 
 import java.io.File
 import java.text.SimpleDateFormat
@@ -27,6 +28,10 @@ import com.google.accompanist.permissions.*
 import com.example.fridgemate.api.ImageUploader
 import com.example.fridgemate.api.TextFilterApi
 import com.example.fridgemate.viewmodel.FridgeViewModel
+
+import android.os.Handler
+import android.os.Looper
+
 
 private const val OCR_DEFAULT_RESULT = "ここにOCR結果が表示されます"
 
@@ -88,7 +93,8 @@ fun CameraScreen(navController: NavController, fridgeViewModel: FridgeViewModel 
                     executor = executor,
                     context = context,
                     onOcrResult = { result -> ocrResult = result },
-                    fridgeViewModel = fridgeViewModel
+                    fridgeViewModel = fridgeViewModel,
+                    navController = navController
                 )
             }
         },
@@ -152,7 +158,8 @@ private fun takePictureAndProcess(
     executor: java.util.concurrent.Executor,
     context: Context,
     onOcrResult: (String) -> Unit,
-    fridgeViewModel: FridgeViewModel
+    fridgeViewModel: FridgeViewModel,
+    navController: NavController
 ) {
     // 撮影画像のファイル名を生成
     val photoFile = File(
@@ -181,7 +188,12 @@ private fun takePictureAndProcess(
                             .split("\n")
                             .map { it.trim() }
                             .filter { it.isNotEmpty() }
-                        fridgeViewModel.addFoodItems(cleanedList)
+//                        fridgeViewModel.addFoodItems(cleanedList)
+                        fridgeViewModel.setTempFoodItems(cleanedList)
+                        // 編集画面へ遷移
+                        Handler(Looper.getMainLooper()).post {
+                            navController.navigate("edit_food")
+                        }
                     }
                 }
                 Toast.makeText(context, "撮影成功: ${photoFile.name}", Toast.LENGTH_SHORT).show()

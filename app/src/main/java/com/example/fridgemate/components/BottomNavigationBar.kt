@@ -19,16 +19,18 @@ sealed class BottomNavItem(val route: String, val icon: ImageVector, val label: 
     object Home : BottomNavItem("home", Icons.Default.Home, "ホーム")
     object Search : BottomNavItem("search", Icons.Default.Search, "検索")
     object AddFridge : BottomNavItem("CameraScreen", Icons.Default.AddCircle, "追加")
-    object List : BottomNavItem("shopping", Icons.Default.List, "リスト")
+    //object List : BottomNavItem("shopping", Icons.Default.List, "リスト")
     object Config : BottomNavItem("shopping", Icons.Default.Settings, "設定")
+    object InvScreen : BottomNavItem("inventory", Icons.Default.List, "冷蔵庫")
 }
 
 val bottomNavItems = listOf(
     BottomNavItem.Home,
     BottomNavItem.Search,
     BottomNavItem.AddFridge,
-    BottomNavItem.List,
+    //BottomNavItem.List,
     BottomNavItem.Config,
+    BottomNavItem.InvScreen
 )
 
 @Composable

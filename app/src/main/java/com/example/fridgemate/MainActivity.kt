@@ -36,7 +36,9 @@ fun FridgeMateApp() {
             androidx.compose.foundation.layout.Box(
                 modifier = Modifier.padding(innerPadding)
             ) {
-                FridgeMateNavGraph(navController = navController)
+                FridgeMateNavGraph(navController = navController,
+                    fridgeViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+                )
             }
         }
     }
