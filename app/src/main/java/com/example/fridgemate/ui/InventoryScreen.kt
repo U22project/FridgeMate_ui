@@ -1,5 +1,7 @@
 package com.example.fridgemate.ui
 
+import android.os.Handler
+import android.os.Looper
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -11,12 +13,37 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.fridgemate.components.BottomNavigationBar
+import okhttp3.*
+import org.json.JSONArray
+import java.io.IOException
 
 @Composable
 fun InventoryScreen(navController: NavController) {
     var selectedTab by remember { mutableStateOf(0) }
     val tabTitles = listOf("冷蔵", "冷凍", "常温")
+    var foodItems by remember { mutableStateOf(listOf<String>()) }
+
+    // APIから食材リストを取得
+    LaunchedEffect(Unit) {
+        val client = OkHttpClient()
+        val request = Request.Builder()
+            .url("http://192.168.11.16:5000/get_food_items") // エミュレータの場合
+            .build()
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                // エラー処理（必要ならログ出力）
+            }
+            override fun onResponse(call: Call, response: Response) {
+                response.body?.string()?.let { body ->
+                    val jsonArray = JSONArray(body)
+                    val items = List(jsonArray.length()) { i -> jsonArray.getString(i) }
+                    Handler(Looper.getMainLooper()).post {
+                        foodItems = items
+                    }
+                }
+            }
+        })
+    }
 
     Scaffold(
         //bottomBar = { BottomNavigationBar(navController = navController) }
@@ -49,7 +76,7 @@ fun InventoryScreen(navController: NavController) {
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(10) { index ->
+                items(foodItems.size) { index ->
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(8.dp),
@@ -62,8 +89,8 @@ fun InventoryScreen(navController: NavController) {
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Column {
-                                Text("食材名 $index", fontWeight = FontWeight.SemiBold)
-                                Text("量: 1個  賞味期限: 2024/07/01", fontSize = 12.sp)
+                                Text(foodItems[index], fontWeight = FontWeight.SemiBold)
+                                // 必要に応じて量や賞味期限も追加
                             }
                             Text("🥬", fontSize = 20.sp)
                         }

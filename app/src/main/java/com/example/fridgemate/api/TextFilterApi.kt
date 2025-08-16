@@ -14,7 +14,7 @@ object TextFilterApi {
 
     // FlaskサーバーのIPアドレスとポート（実機と同じネットワークにいる前提）
     //private const val SERVER_URL = "http://192.168.50.77:5000/filter_text"
-    private const val SERVER_URL = "http://192.168.50.77:5000/test_filter"
+    private const val SERVER_URL = "http://192.168.11.16:5000/test_filter"
 
     private val client = OkHttpClient()
 

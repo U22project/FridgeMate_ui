@@ -18,6 +18,12 @@ import android.os.Handler
 import android.os.Looper
 import androidx.compose.runtime.LaunchedEffect
 
+import okhttp3.*
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONArray
+import java.io.IOException
+import android.util.Log
 
 @Composable
 fun EditFoodScreen(
@@ -25,17 +31,10 @@ fun EditFoodScreen(
     fridgeViewModel: FridgeViewModel,
     modifier: Modifier = Modifier
 ) {
-    val tempItems = remember { mutableStateListOf<String>() }
-
-    LaunchedEffect(fridgeViewModel.tempFoodItems) {
-        tempItems.clear()
-        tempItems.addAll(fridgeViewModel.tempFoodItems)
-    }
+    val tempItems = fridgeViewModel.tempFoodItems
 
     Column(modifier = modifier.fillMaxSize().padding(16.dp)) {
-        // EditFoodScreen.kt 内
-        Text("ViewModelの中身: ${fridgeViewModel.tempFoodItems.joinToString()}", style = MaterialTheme.typography.bodySmall)
-        //Text("ViewModelの中身: ${fridgeViewModel.tempFoodItems.joinToString()}", style = MaterialTheme.typography.bodySmall)
+        Text("ViewModelの中身: ${tempItems.joinToString()}", style = MaterialTheme.typography.bodySmall)
         Text("抽出された食材を編集", style = MaterialTheme.typography.titleMedium)
 
         LazyColumn(modifier = Modifier.weight(1f)) {
@@ -58,10 +57,23 @@ fun EditFoodScreen(
 
         Button(
             onClick = {
-                // 保存して ViewModel に渡す
-                fridgeViewModel.addFoodItems(tempItems.toList())
-//                navController.navigate("fridge")
+                val client = OkHttpClient()
+                val json = JSONArray(tempItems).toString()
+                val requestBody = json.toRequestBody("application/json".toMediaTypeOrNull())
+                val request = Request.Builder()
+                    .url("http://192.168.11.16:5000/add_food_items")
+                    .post(requestBody)
+                    .build()
+                client.newCall(request).enqueue(object : Callback {
+                    override fun onFailure(call: Call, e: IOException) {
+                        Log.e("API", "POST失敗: ${e.message}")
+                    }
+                    override fun onResponse(call: Call, response: Response) {
+                        Log.d("API", "POST成功: ${response.body?.string()}")
+                    }
+                })
 
+                fridgeViewModel.addFoodItems(tempItems.toList())
                 Handler(Looper.getMainLooper()).post {
                     navController.navigate("home")
                 }

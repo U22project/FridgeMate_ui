@@ -12,7 +12,7 @@ object ImageUploader {
 
     private const val TAG = "ImageUploader"
 //    private const val SERVER_URL = "http://192.168.50.77:5000/ocr"
-    private const val SERVER_URL = "http://192.168.50.77:5000/test_ocr"
+    private const val SERVER_URL = "http://192.168.11.16:5000/test_ocr"
     fun sendImageToServer(imageFile: File, onResult: (String?) -> Unit) {
         val client = OkHttpClient()
 
