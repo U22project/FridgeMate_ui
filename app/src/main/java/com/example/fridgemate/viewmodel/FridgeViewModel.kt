@@ -9,11 +9,11 @@ class FridgeViewModel : ViewModel() {
 //    fun addFoodItems(items: List<String>) {
 //        foodList.addAll(items)
 //    }
-var foodItems = mutableStateListOf<String>()
-    private set
+    var foodItems = mutableStateListOf<String>()
+        private set
 
-    private var _tempFoodItems = mutableStateListOf<String>() // Gemini結果を一時保持
-    val tempFoodItems: List<String> get() = _tempFoodItems
+    var tempFoodItems = mutableStateListOf<String>()
+        private set
 
     fun addFoodItems(items: List<String>) {
         foodItems.clear()
@@ -21,8 +21,7 @@ var foodItems = mutableStateListOf<String>()
     }
 
     fun setTempFoodItems(items: List<String>) {
-        _tempFoodItems.clear()
-        _tempFoodItems.addAll(items)
+        tempFoodItems.clear()
+        tempFoodItems.addAll(items)
     }
-
 }
