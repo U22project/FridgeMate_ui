@@ -31,7 +31,11 @@ fun EditFoodScreen(
     fridgeViewModel: FridgeViewModel,
     modifier: Modifier = Modifier
 ) {
-    val tempItems = fridgeViewModel.tempFoodItems
+    val tempItems = remember { mutableStateListOf<String>() }
+    LaunchedEffect(Unit) {
+        tempItems.clear()
+        tempItems.addAll(fridgeViewModel.tempFoodItems)
+    }
 
     Column(modifier = modifier.fillMaxSize().padding(16.dp)) {
         Text("ViewModelの中身: ${tempItems.joinToString()}", style = MaterialTheme.typography.bodySmall)
@@ -61,7 +65,7 @@ fun EditFoodScreen(
                 val json = JSONArray(tempItems).toString()
                 val requestBody = json.toRequestBody("application/json".toMediaTypeOrNull())
                 val request = Request.Builder()
-                    .url("http://192.168.11.16:5000/add_food_items")
+                    .url("http://192.168.50.77:5000/add_food_items")
                     .post(requestBody)
                     .build()
                 client.newCall(request).enqueue(object : Callback {
