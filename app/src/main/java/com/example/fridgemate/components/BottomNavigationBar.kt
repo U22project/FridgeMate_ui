@@ -29,8 +29,9 @@ val bottomNavItems = listOf(
     BottomNavItem.Search,
     BottomNavItem.AddFridge,
     //BottomNavItem.List,
-    BottomNavItem.Config,
-    BottomNavItem.InvScreen
+    BottomNavItem.InvScreen,
+    BottomNavItem.Config
+
 )
 
 @Composable

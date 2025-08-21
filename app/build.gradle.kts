@@ -67,4 +67,6 @@ dependencies {
     //http
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.google.accompanist:accompanist-permissions:0.34.0")
+    // 画像表示用
+    implementation("io.coil-kt:coil-compose:2.4.0")
 }

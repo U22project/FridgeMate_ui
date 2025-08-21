@@ -13,11 +13,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.fridgemate.components.BottomNavigationBar
-
+import com.example.fridgemate.viewmodel.FridgeViewModel
+import com.example.fridgemate.viewmodel.HomeViewModel
 @Composable
-fun HomeScreen(navController: NavController) {
+fun HomeScreen(navController: NavController,fridgeViewModel: FridgeViewModel = viewModel()) {
+    //
+    val homeViewModel: HomeViewModel = viewModel<HomeViewModel>()
+    val recipes = homeViewModel.recipes
     Scaffold(
         //bottomBar = { BottomNavigationBar(navController = navController) }
     ) { innerPadding ->
@@ -50,39 +56,25 @@ fun HomeScreen(navController: NavController) {
                 style = MaterialTheme.typography.titleMedium
             )
 
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                shape = RoundedCornerShape(12.dp),
-                tonalElevation = 2.dp
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Box(
+            LazyRow {
+                items(recipes.size) { i ->
+                    val item = recipes[i]
+                    Surface(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .height(160.dp)
+                            .width(200.dp)
+                            .padding(end = 8.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        tonalElevation = 2.dp
                     ) {
-                        Text(
-                            text = "画像",
-                            modifier = Modifier.align(Alignment.Center)
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text("しょうが焼き", fontWeight = FontWeight.SemiBold)
-                    Text("10分", style = MaterialTheme.typography.bodySmall)
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Row {
-                        repeat(3) {
-                            Box(
+                        Column(Modifier.padding(12.dp)) {
+                            AsyncImage(  // Coilライブラリ必要
+                                model = item.imageUrl,
+                                contentDescription = item.title,
                                 modifier = Modifier
-                                    .size(32.dp)
-                                    .padding(end = 4.dp)
-                            ) {
-                                Text("🥕", modifier = Modifier.align(Alignment.Center))
-                            }
+                                    .fillMaxWidth()
+                                    .height(120.dp)
+                            )
+                            Text(item.title, fontWeight = FontWeight.Bold)
                         }
                     }
                 }

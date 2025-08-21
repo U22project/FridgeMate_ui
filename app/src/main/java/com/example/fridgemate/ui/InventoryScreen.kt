@@ -27,7 +27,7 @@ fun InventoryScreen(navController: NavController) {
     LaunchedEffect(Unit) {
         val client = OkHttpClient()
         val request = Request.Builder()
-            .url("http://192.168.11.16:5000/get_food_items") // エミュレータの場合
+            .url("http://192.168.50.77:5000/get_food_items") // エミュレータの場合
             .build()
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
