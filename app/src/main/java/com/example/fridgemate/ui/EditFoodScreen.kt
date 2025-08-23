@@ -25,31 +25,93 @@ import org.json.JSONArray
 import java.io.IOException
 import android.util.Log
 
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import com.example.fridgemate.datamodel.FoodItem
+
 @Composable
 fun EditFoodScreen(
     navController: NavController,
     fridgeViewModel: FridgeViewModel,
     modifier: Modifier = Modifier
 ) {
-    val tempItems = remember { mutableStateListOf<String>() }
+    val tempItems = remember { mutableStateListOf<FoodItem>() }
     LaunchedEffect(Unit) {
         tempItems.clear()
         tempItems.addAll(fridgeViewModel.tempFoodItems)
     }
+    // 追加用の入力欄
+    var newItemText: String by remember { mutableStateOf("") }
+
 
     Column(modifier = modifier.fillMaxSize().padding(16.dp)) {
         Text("ViewModelの中身: ${tempItems.joinToString()}", style = MaterialTheme.typography.bodySmall)
         Text("抽出された食材を編集", style = MaterialTheme.typography.titleMedium)
 
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            TextField(
+                value = newItemText,
+                onValueChange = { newItemText = it },
+                label = { Text("食材を追加") },
+                modifier = Modifier.weight(1f)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Button(
+                onClick = {
+                    if (newItemText.isNotBlank()) {
+                        tempItems.add(
+                            FoodItem(
+                            name = newItemText.trim(),
+                            quantity = 1, // デフォルトの個数
+                            expireDate = "/" // デフォルトの賞味期限
+                            )
+                        )
+                        newItemText = ""
+                    }
+                }
+            ) {
+                Text("追加")
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         LazyColumn(modifier = Modifier.weight(1f)) {
-            itemsIndexed(tempItems) { index, item ->
+            val editedItems = tempItems
+            itemsIndexed(editedItems) { index: Int, item:FoodItem ->
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     TextField(
-                        value = item,
-                        onValueChange = { tempItems[index] = it },
+                        value = item.name,
+                        onValueChange = { editedItems[index] = item.copy(name = it) },
+                        label = { Text("名前") },
+                        modifier = Modifier.weight(1.5f)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    TextField(
+                        value = item.quantity.toString(),
+                        onValueChange = {
+                            val newVal = it.toIntOrNull() ?: 1
+                            editedItems[index] = item.copy(quantity = newVal)
+                        },
+                        label = { Text("個数") },
                         modifier = Modifier.weight(1f)
                     )
-                    IconButton(onClick = { tempItems.removeAt(index) }) {
+                    Spacer(modifier = Modifier.width(4.dp))
+                    TextField(
+                        value = item.expireDate,
+                        onValueChange = { input ->
+                            if (Regex("""\d{0,2}/\d{0,2}""").matches(input)) {
+                                editedItems[index] = item.copy(expireDate = input)
+                            }
+                        },
+                        label = { Text("賞味期限mm/dd") },
+                        modifier = Modifier.weight(1.5f)
+                    )
+                    IconButton(onClick = { editedItems.removeAt(index) }) {
                         Icon(Icons.Default.Delete, contentDescription = "削除")
                     }
                 }
@@ -59,32 +121,44 @@ fun EditFoodScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Button(
-            onClick = {
-                val client = OkHttpClient()
-                val json = JSONArray(tempItems).toString()
-                val requestBody = json.toRequestBody("application/json".toMediaTypeOrNull())
-                val request = Request.Builder()
-                    .url("http://192.168.50.77:5000/add_food_items")
-                    .post(requestBody)
-                    .build()
-                client.newCall(request).enqueue(object : Callback {
-                    override fun onFailure(call: Call, e: IOException) {
-                        Log.e("API", "POST失敗: ${e.message}")
-                    }
-                    override fun onResponse(call: Call, response: Response) {
-                        Log.d("API", "POST成功: ${response.body?.string()}")
-                    }
-                })
+        val onBackClick = { navController.navigate("CameraScreen") }
+        Row (
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ){
+            Button(
+                onClick = onBackClick,
+            ) {
+                Text("戻る")
+            }
 
-                fridgeViewModel.addFoodItems(tempItems.toList())
-                Handler(Looper.getMainLooper()).post {
-                    navController.navigate("home")
-                }
-            },
-            modifier = Modifier.align(Alignment.CenterHorizontally)
-        ) {
-            Text("保存して冷蔵庫へ")
+            Button(
+                onClick = {
+                    val client = OkHttpClient()
+                    val json = JSONArray(tempItems).toString()
+                    val requestBody = json.toRequestBody("application/json".toMediaTypeOrNull())
+                    val request = Request.Builder()
+                        .url("http://192.168.50.77:5000/add_food_items")
+                        .post(requestBody)
+                        .build()
+                    client.newCall(request).enqueue(object : Callback {
+                        override fun onFailure(call: Call, e: IOException) {
+                            Log.e("API", "POST失敗: ${e.message}")
+                        }
+                        override fun onResponse(call: Call, response: Response) {
+                            Log.d("API", "POST成功: ${response.body?.string()}")
+                        }
+                    })
+
+                    fridgeViewModel.addFoodItems(tempItems.toList())
+                    Handler(Looper.getMainLooper()).post {
+                        navController.navigate("home")
+                    }
+                },
+            ) {
+                Text("保存して冷蔵庫へ")
+            }
         }
+
     }
 }
