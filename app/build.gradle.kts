@@ -13,8 +13,13 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
-        buildConfigField("String", "SERVER_URL", "\"${project.rootProject.file("local.properties").readLines().find { it.startsWith("SERVER_URL") }?.split("=")?.get(1)?.trim()}\"")
-    }
+        val serverUrl = project.rootProject.file("local.properties").readLines()
+            .find { it.startsWith("SERVER_URL") }
+            ?.split("=")
+            ?.get(1)
+            ?.trim()
+        buildConfigField("String", "SERVER_URL", "\"$serverUrl\"")
+        }
 
     buildFeatures {
         compose = true
