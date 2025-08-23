@@ -29,6 +29,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import com.example.fridgemate.datamodel.FoodItem
+import com.example.fridgemate.BuildConfig
+
+private const val serverUrl = BuildConfig.SERVER_URL + "/add_food_items"
 
 @Composable
 fun EditFoodScreen(
@@ -135,10 +138,21 @@ fun EditFoodScreen(
             Button(
                 onClick = {
                     val client = OkHttpClient()
-                    val json = JSONArray(tempItems).toString()
+                    val jsonArray = JSONArray()
+                    tempItems.forEach { item ->
+                        val jsonObj = org.json.JSONObject().apply {
+                            put("name", item.name)
+                            put("quantity", item.quantity)
+                            put("expireDate", item.expireDate)
+                        }
+                        jsonArray.put(jsonObj)
+                    }
+
+                    val json = jsonArray.toString()
                     val requestBody = json.toRequestBody("application/json".toMediaTypeOrNull())
+//                    Log.e("API", "送信データ: $json")
                     val request = Request.Builder()
-                        .url("http://192.168.50.77:5000/add_food_items")
+                        .url(serverUrl)
                         .post(requestBody)
                         .build()
                     client.newCall(request).enqueue(object : Callback {
@@ -152,7 +166,7 @@ fun EditFoodScreen(
 
                     fridgeViewModel.addFoodItems(tempItems.toList())
                     Handler(Looper.getMainLooper()).post {
-                        navController.navigate("home")
+                        navController.navigate("inventory")
                     }
                 },
             ) {

@@ -7,6 +7,7 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 import java.io.IOException
+import com.example.fridgemate.BuildConfig
 
 object TextFilterApi {
 
@@ -14,7 +15,8 @@ object TextFilterApi {
 
     // FlaskサーバーのIPアドレスとポート（実機と同じネットワークにいる前提）
     //private const val SERVER_URL = "http://192.168.50.77:5000/filter_text"
-    private const val SERVER_URL = "http://192.168.50.77:5000/test_filter"
+//    private const val SERVER_URL = "http://192.168.50.77:5000/test_filter"
+    private const val serverUrl = BuildConfig.SERVER_URL + "/test_filter"
 
     private val client = OkHttpClient()
 
@@ -26,7 +28,7 @@ object TextFilterApi {
             .toRequestBody("application/json".toMediaTypeOrNull())
 
         val request = Request.Builder()
-            .url(SERVER_URL)
+            .url(serverUrl)
             .post(requestBody)
             .build()
 
