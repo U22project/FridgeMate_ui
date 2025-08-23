@@ -16,6 +16,9 @@ import androidx.navigation.NavController
 import okhttp3.*
 import org.json.JSONArray
 import java.io.IOException
+import com.example.fridgemate.BuildConfig
+
+private const val serverUrl = BuildConfig.SERVER_URL + "/get_food_items"
 
 @Composable
 fun InventoryScreen(navController: NavController) {
@@ -27,7 +30,7 @@ fun InventoryScreen(navController: NavController) {
     LaunchedEffect(Unit) {
         val client = OkHttpClient()
         val request = Request.Builder()
-            .url("http://192.168.50.77:5000/get_food_items") // エミュレータの場合
+            .url(serverUrl) // エミュレータの場合
             .build()
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {

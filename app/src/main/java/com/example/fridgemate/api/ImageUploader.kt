@@ -7,12 +7,13 @@ import okhttp3.RequestBody.Companion.asRequestBody
 import org.json.JSONObject
 import java.io.File
 import java.io.IOException
+import com.example.fridgemate.BuildConfig
+
 
 object ImageUploader {
 
     private const val TAG = "ImageUploader"
-    //private const val SERVER_URL = "http://192.168.50.77:5000/ocr"
-    private const val SERVER_URL = "http://192.168.50.77:5000/test_ocr"
+    private const val serverUrl = BuildConfig.SERVER_URL + "/test_ocr"
     fun sendImageToServer(imageFile: File, onResult: (String?) -> Unit) {
         val client = OkHttpClient()
 
@@ -25,7 +26,7 @@ object ImageUploader {
             .build()
 
         val request = Request.Builder()
-            .url(SERVER_URL)
+            .url(serverUrl)
             .post(requestBody)
             .build()
 
