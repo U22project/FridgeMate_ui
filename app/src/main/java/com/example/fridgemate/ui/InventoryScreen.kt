@@ -20,7 +20,7 @@ import java.io.IOException
 @Composable
 fun InventoryScreen(navController: NavController) {
     var selectedTab by remember { mutableStateOf(0) }
-    val tabTitles = listOf("冷蔵", "冷凍", "常温")
+    val tabTitles = listOf("冷蔵庫")
     var foodItems by remember { mutableStateOf(listOf<String>()) }
 
     // APIから食材リストを取得
@@ -54,12 +54,12 @@ fun InventoryScreen(navController: NavController) {
                 .padding(16.dp)
                 .fillMaxSize()
         ) {
-            Text(
-                text = "在庫管理",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
+//            Text(
+//                text = "",
+//                fontSize = 20.sp,
+//                fontWeight = FontWeight.Bold,
+//                modifier = Modifier.padding(bottom = 16.dp)
+//            )
 
             TabRow(selectedTabIndex = selectedTab) {
                 tabTitles.forEachIndexed { index, title ->

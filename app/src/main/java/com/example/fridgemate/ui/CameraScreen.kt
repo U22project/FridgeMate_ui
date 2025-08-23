@@ -19,6 +19,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavController.*
+import com.example.fridgemate.R
 
 import java.io.File
 import java.text.SimpleDateFormat
@@ -34,6 +35,7 @@ import android.os.Looper
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Create
 import com.example.fridgemate.datamodel.FoodItem
+import androidx.compose.ui.res.painterResource
 
 
 private const val OCR_DEFAULT_RESULT = "ここにOCR結果が表示されます"
@@ -161,12 +163,19 @@ private fun CameraScreenContent(
                 Button(
                     onClick = onCaptureClick,
                 ) {
-                    Text("📸 撮影して登録")
+                    Text("撮影")
+                    Icon(
+                        painter = painterResource(id = R.drawable.document_scanner),
+                        contentDescription = "Document Scanner"
+                    )
                 }
                 Button(
                     onClick = onFridgeClick,
                 ) {
-                    Text("手入力で登録")
+                    Icon(
+                        painter = painterResource(id = R.drawable.edit),
+                        contentDescription = "Document Scanner"
+                    )
                 }
             }
         }

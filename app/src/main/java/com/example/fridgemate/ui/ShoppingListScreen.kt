@@ -1,71 +1,90 @@
 package com.example.fridgemate.ui
 
+import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.fridgemate.components.BottomNavigationBar
+import com.example.fridgemate.datastore.ShoppingListManager
+import kotlinx.coroutines.launch
 
 @Composable
 fun ShoppingListScreen(navController: NavController) {
-    val items = remember { mutableStateListOf("にんじん", "牛乳", "パン", "卵") }
-    val checkedStates = remember { mutableStateMapOf<String, Boolean>() }
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
 
-    Scaffold(
-        //bottomBar = { BottomNavigationBar(navController = navController) },
-        floatingActionButton = {
-            FloatingActionButton(onClick = { /* 追加処理 */ }) {
-                Text("＋")
-            }
-        }
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .padding(innerPadding)
-                .padding(16.dp)
-                .fillMaxSize()
-        ) {
-            Text(
-                text = "お買い物リスト",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
+    val shoppingList = remember { mutableStateListOf<String>() }
+    var newItem by remember { mutableStateOf("") }
 
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(items.size) { index ->
-                    val item = items[index]
-                    val checked = checkedStates[item] ?: false
-                    Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(8.dp),
-                        tonalElevation = 1.dp
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .padding(12.dp)
-                                .fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(item, fontWeight = FontWeight.SemiBold)
-                            Checkbox(
-                                checked = checked,
-                                onCheckedChange = { checkedStates[item] = it }
-                            )
+    // 初回読み込み
+    LaunchedEffect(Unit) {
+        val saved = ShoppingListManager.loadList(context)
+        shoppingList.addAll(saved)
+    }
+
+    Column(modifier = Modifier
+        .fillMaxSize()
+        .padding(16.dp)) {
+
+        Text("買い物メモ", style = MaterialTheme.typography.headlineMedium)
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        LazyColumn(modifier = Modifier.weight(1f)) {
+            itemsIndexed(shoppingList) { index, item ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+                ) {
+                    Text(
+                        text = item,
+                        modifier = Modifier.weight(1f),
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                    IconButton(onClick = {
+                        shoppingList.removeAt(index)
+                        coroutineScope.launch {
+                            ShoppingListManager.saveList(context, shoppingList)
                         }
+                    }) {
+                        Icon(Icons.Default.Delete, contentDescription = "削除")
                     }
                 }
             }
         }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Row {
+            TextField(
+                value = newItem,
+                onValueChange = { newItem = it },
+                modifier = Modifier.weight(1f),
+                placeholder = { Text("メモを追加") }
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Button(onClick = {
+                if (newItem.isNotBlank()) {
+                    shoppingList.add(newItem.trim())
+                    newItem = ""
+                    coroutineScope.launch {
+                        ShoppingListManager.saveList(context, shoppingList)
+                    }
+                }
+            }) {
+                Text("追加")
+            }
+        }
     }
 }
+
+

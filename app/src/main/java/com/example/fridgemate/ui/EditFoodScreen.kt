@@ -156,7 +156,7 @@ fun EditFoodScreen(
                     }
                 },
             ) {
-                Text("保存して冷蔵庫へ")
+                Text("冷蔵庫に入れる")
             }
         }
 

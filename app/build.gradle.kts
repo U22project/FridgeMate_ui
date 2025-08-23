@@ -69,4 +69,8 @@ dependencies {
     implementation("com.google.accompanist:accompanist-permissions:0.34.0")
     // 画像表示用
     implementation("io.coil-kt:coil-compose:2.4.0")
+    //アイコン
+    implementation("androidx.compose.material:material-icons-extended:1.6.7")
+    //データストア
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
 }
