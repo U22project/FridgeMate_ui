@@ -31,6 +31,9 @@ import com.example.fridgemate.viewmodel.FridgeViewModel
 
 import android.os.Handler
 import android.os.Looper
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Create
+import com.example.fridgemate.datamodel.FoodItem
 
 
 private const val OCR_DEFAULT_RESULT = "ここにOCR結果が表示されます"
@@ -65,12 +68,13 @@ fun CameraScreen(navController: NavController, fridgeViewModel: FridgeViewModel 
     val executor = ContextCompat.getMainExecutor(context)
 
     // カメラのセットアップ
-    LaunchedEffect(Unit) {
+    DisposableEffect(lifecycleOwner) {
         val cameraProvider = cameraProviderFuture.get()
         val preview = Preview.Builder().build().also {
             it.setSurfaceProvider(previewView.surfaceProvider)
         }
         imageCapture = ImageCapture.Builder().build()
+
         cameraProvider.unbindAll()
         cameraProvider.bindToLifecycle(
             lifecycleOwner,
@@ -78,6 +82,10 @@ fun CameraScreen(navController: NavController, fridgeViewModel: FridgeViewModel 
             preview,
             imageCapture
         )
+
+        onDispose {
+            cameraProvider.unbindAll()
+        }
     }
 
     // メインUI表示
@@ -98,7 +106,11 @@ fun CameraScreen(navController: NavController, fridgeViewModel: FridgeViewModel 
                 )
             }
         },
-        onBackClick = { navController.navigate("fridge") }
+        onBackClick = { navController.navigate("home") },
+        onFridgeClick = {
+            // 手入力で食材登録画面へ遷移
+            navController.navigate("edit_food")
+        }
     )
 }
 
@@ -123,7 +135,8 @@ private fun CameraScreenContent(
     previewView: PreviewView,
     ocrResult: String,
     onCaptureClick: () -> Unit,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onFridgeClick: () -> Unit
 ) {
     // カメラプレビューとOCR結果、ボタンUI
     Column(modifier = Modifier.fillMaxSize()) {
@@ -135,18 +148,26 @@ private fun CameraScreenContent(
         ) {
             Text("OCR結果:", style = MaterialTheme.typography.titleMedium)
             Text(ocrResult, modifier = Modifier.padding(vertical = 8.dp))
-            Button(
-                onClick = onCaptureClick,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            ) {
-                Text("📸 撮影してOCR")
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            Button(
-                onClick = onBackClick,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            ) {
-                Text("戻る")
+            Row (
+                modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly){
+                Button(
+                    onClick = onBackClick,
+                ) {
+                    Text("戻る")
+                }
+                Button(
+                    onClick = onCaptureClick,
+                ) {
+                    Text("📸 撮影して登録")
+                }
+                Button(
+                    onClick = onFridgeClick,
+                ) {
+                    Text("手入力で登録")
+                }
             }
         }
     }
@@ -189,7 +210,11 @@ private fun takePictureAndProcess(
                             .map { it.trim() }
                             .filter { it.isNotEmpty() }
 //                        fridgeViewModel.addFoodItems(cleanedList)
-                        fridgeViewModel.setTempFoodItems(cleanedList)
+                        val foodItems = cleanedList.map { name ->
+                            FoodItem(name = name, quantity = 1, expireDate = "")
+                        }
+
+                        fridgeViewModel.setTempFoodItems(foodItems)
                         // 編集画面へ遷移
                         Handler(Looper.getMainLooper()).post {
                             navController.navigate("edit_food")
