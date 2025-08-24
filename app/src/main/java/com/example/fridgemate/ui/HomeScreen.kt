@@ -2,6 +2,7 @@ package com.example.fridgemate.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -19,11 +20,18 @@ import coil.compose.AsyncImage
 import com.example.fridgemate.components.BottomNavigationBar
 import com.example.fridgemate.viewmodel.FridgeViewModel
 import com.example.fridgemate.viewmodel.HomeViewModel
+import com.example.fridgemate.viewmodel.ExpireDataViewModel
+import androidx.compose.runtime.collectAsState
+import androidx.compose.foundation.lazy.items
+
+
 @Composable
-fun HomeScreen(navController: NavController,fridgeViewModel: FridgeViewModel = viewModel()) {
+fun HomeScreen(navController: NavController,fridgeViewModel: FridgeViewModel = viewModel(),expireDataViewModel: ExpireDataViewModel = viewModel()) {
     //
     val homeViewModel: HomeViewModel = viewModel<HomeViewModel>()
     val recipes = homeViewModel.recipes
+    val expiringFoods = expireDataViewModel.expiringFoods.collectAsState().value
+
     Scaffold(
         //bottomBar = { BottomNavigationBar(navController = navController) }
     ) { innerPadding ->
@@ -83,12 +91,17 @@ fun HomeScreen(navController: NavController,fridgeViewModel: FridgeViewModel = v
             Spacer(modifier = Modifier.height(16.dp))
 
             Text("賞味期限切れ寸前の食材", style = MaterialTheme.typography.titleMedium)
-            LazyRow {
-                items(5) { _ ->
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) {
+                items(expiringFoods) { food ->
                     Surface(
                         modifier = Modifier
-                            .size(width = 120.dp, height = 80.dp)
-                            .padding(end = 8.dp),
+                            .fillMaxWidth()
+                            .height(80.dp)
+                            .padding(vertical = 4.dp),
                         shape = RoundedCornerShape(8.dp),
                         tonalElevation = 1.dp
                     ) {
@@ -96,8 +109,8 @@ fun HomeScreen(navController: NavController,fridgeViewModel: FridgeViewModel = v
                             modifier = Modifier.padding(8.dp),
                             verticalArrangement = Arrangement.Center
                         ) {
-                            Text("卵", fontWeight = FontWeight.Bold)
-                            Text("2024/06/27", fontSize = 12.sp)
+                            Text(food.name, fontWeight = FontWeight.Bold)
+                            Text(food.expire_date, fontSize = 12.sp)
                         }
                     }
                 }
