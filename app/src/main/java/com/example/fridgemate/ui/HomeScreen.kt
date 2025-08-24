@@ -25,7 +25,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONArray
 
-// --- データクラスを直書き ---
+// --- データクラス ---
 data class ExpiringFood(val name: String, val expire_date: String)
 
 @Composable
@@ -36,7 +36,6 @@ fun HomeScreen(
     val homeViewModel: HomeViewModel = viewModel()
     val recipes = homeViewModel.recipes
 
-    // --- ExpireDataViewModel 相当を直書き ---
     var expiringFoods by remember { mutableStateOf<List<ExpiringFood>>(emptyList()) }
     LaunchedEffect(Unit) {
         try {
@@ -48,7 +47,6 @@ fun HomeScreen(
             withContext(Dispatchers.IO) {
                 val response = client.newCall(request).execute()
                 val body = response.body?.string()
-                Log.d("HomeScreen", "APIレスポンス: $body")
 
                 val jsonArray = JSONArray(body)
                 val result = List(jsonArray.length()) { i ->
@@ -64,8 +62,6 @@ fun HomeScreen(
             Log.e("HomeScreen", "エラー: ${e.message}")
         }
     }
-    // --- ここまで ---
-
     Scaffold { innerPadding ->
         Column(
             modifier = Modifier
