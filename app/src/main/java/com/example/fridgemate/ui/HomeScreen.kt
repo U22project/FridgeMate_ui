@@ -1,14 +1,13 @@
 package com.example.fridgemate.ui
 
-import androidx.compose.foundation.Image
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -17,24 +16,57 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.example.fridgemate.components.BottomNavigationBar
 import com.example.fridgemate.viewmodel.FridgeViewModel
 import com.example.fridgemate.viewmodel.HomeViewModel
-import com.example.fridgemate.viewmodel.ExpireDataViewModel
-import androidx.compose.runtime.collectAsState
-import androidx.compose.foundation.lazy.items
+import com.example.fridgemate.BuildConfig
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import org.json.JSONArray
 
+// --- データクラスを直書き ---
+data class ExpiringFood(val name: String, val expire_date: String)
 
 @Composable
-fun HomeScreen(navController: NavController,fridgeViewModel: FridgeViewModel = viewModel(),expireDataViewModel: ExpireDataViewModel = viewModel()) {
-    //
-    val homeViewModel: HomeViewModel = viewModel<HomeViewModel>()
+fun HomeScreen(
+    navController: NavController,
+    fridgeViewModel: FridgeViewModel = viewModel(),
+) {
+    val homeViewModel: HomeViewModel = viewModel()
     val recipes = homeViewModel.recipes
-    val expiringFoods = expireDataViewModel.expiringFoods.collectAsState().value
 
-    Scaffold(
-        //bottomBar = { BottomNavigationBar(navController = navController) }
-    ) { innerPadding ->
+    // --- ExpireDataViewModel 相当を直書き ---
+    var expiringFoods by remember { mutableStateOf<List<ExpiringFood>>(emptyList()) }
+    LaunchedEffect(Unit) {
+        try {
+            val client = OkHttpClient()
+            val request = Request.Builder()
+                .url(BuildConfig.SERVER_URL + "/expiring_soon")
+                .build()
+
+            withContext(Dispatchers.IO) {
+                val response = client.newCall(request).execute()
+                val body = response.body?.string()
+                Log.d("HomeScreen", "APIレスポンス: $body")
+
+                val jsonArray = JSONArray(body)
+                val result = List(jsonArray.length()) { i ->
+                    val obj = jsonArray.getJSONObject(i)
+                    ExpiringFood(
+                        name = obj.getString("ingredients"),
+                        expire_date = obj.getString("expiration_date")
+                    )
+                }
+                expiringFoods = result
+            }
+        } catch (e: Exception) {
+            Log.e("HomeScreen", "エラー: ${e.message}")
+        }
+    }
+    // --- ここまで ---
+
+    Scaffold { innerPadding ->
         Column(
             modifier = Modifier
                 .padding(innerPadding)
@@ -51,10 +83,6 @@ fun HomeScreen(navController: NavController,fridgeViewModel: FridgeViewModel = v
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold
                 )
-//                Icon(
-//                    imageVector = Icons.Default.AccountCircle,
-//                    contentDescription = "Profile"
-//                )
             }
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -75,7 +103,7 @@ fun HomeScreen(navController: NavController,fridgeViewModel: FridgeViewModel = v
                         tonalElevation = 2.dp
                     ) {
                         Column(Modifier.padding(12.dp)) {
-                            AsyncImage(  // Coilライブラリ必要
+                            AsyncImage(
                                 model = item.imageUrl,
                                 contentDescription = item.title,
                                 modifier = Modifier
@@ -90,7 +118,8 @@ fun HomeScreen(navController: NavController,fridgeViewModel: FridgeViewModel = v
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Text("賞味期限切れ寸前の食材", style = MaterialTheme.typography.titleMedium)
+            Text("賞味期限の近い食材", style = MaterialTheme.typography.titleMedium)
+
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
@@ -110,7 +139,7 @@ fun HomeScreen(navController: NavController,fridgeViewModel: FridgeViewModel = v
                             verticalArrangement = Arrangement.Center
                         ) {
                             Text(food.name, fontWeight = FontWeight.Bold)
-                            Text(food.expire_date, fontSize = 12.sp)
+                            Text(food.expire_date, fontSize = 14.sp, color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.SemiBold)
                         }
                     }
                 }
