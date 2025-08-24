@@ -11,9 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
@@ -41,6 +39,8 @@ fun InventoryScreen(navController: NavController) {
     var selectedTab by remember { mutableStateOf(0) }
     val tabTitles = listOf("冷蔵庫")
     var foodItems by remember { mutableStateOf(listOf<FoodItem>()) }
+    var showDialog by remember { mutableStateOf(false) }
+    var itemToDelete by remember { mutableStateOf<FoodItem?>(null) }
 
     fun fetchFoodItems() {
         val client = OkHttpClient()
@@ -79,7 +79,6 @@ fun InventoryScreen(navController: NavController) {
         })
     }
 
-    // 削除処理
     fun deleteItem(item: FoodItem) {
         val client = OkHttpClient()
         val json = """
@@ -163,18 +162,43 @@ fun InventoryScreen(navController: NavController) {
                             Text("${item.quantity}個", modifier = Modifier.weight(1f))
                             Text(item.expiration_date, modifier = Modifier.weight(1f))
                             IconButton(
-                                onClick = { deleteItem(item) },
+                                onClick = {
+                                    itemToDelete = item
+                                    showDialog = true
+                                },
                                 modifier = Modifier
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Delete,
                                     contentDescription = "削除",
-                                    tint = Color.Red
+                                    tint = Color.White // 白色
                                 )
                             }
                         }
                     }
                 }
+            }
+
+            // 削除確認ダイアログ
+            if (showDialog && itemToDelete != null) {
+                AlertDialog(
+                    onDismissRequest = { showDialog = false },
+                    title = { Text("確認") },
+                    text = { Text("本当に削除しますか？") },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            itemToDelete?.let { deleteItem(it) }
+                            showDialog = false
+                        }) {
+                            Text("Yes")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showDialog = false }) {
+                            Text("No")
+                        }
+                    }
+                )
             }
         }
     }
