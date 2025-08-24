@@ -24,14 +24,21 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONArray
 import java.io.IOException
 import android.util.Log
+import android.widget.Toast
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.text.font.FontWeight
 import com.example.fridgemate.datamodel.FoodItem
 import com.example.fridgemate.BuildConfig
 
 private const val serverUrl = BuildConfig.SERVER_URL + "/add_food_items"
+// 入力途中は 0〜2桁 + 任意の「/」+ 0〜2桁 を許容
+private val inputRegex = Regex("""\d{0,2}(/(\d{0,2})?)?""")
+
+// 保存時は MM/DD（ゼロ埋め必須）を厳格チェック
+private val strictMmDdRegex = Regex("""^(0[1-9]|1[0-2])/(0[1-9]|[12]\d|3[01])$""")
 
 @Composable
 fun EditFoodScreen(
@@ -70,7 +77,7 @@ fun EditFoodScreen(
                             FoodItem(
                             name = newItemText.trim(),
                             quantity = 1, // デフォルトの個数
-                            expireDate = "/" // デフォルトの賞味期限
+                            expireDate = "" // デフォルトの賞味期限
                             )
                         )
                         newItemText = ""
@@ -79,6 +86,17 @@ fun EditFoodScreen(
             ) {
                 Text("追加")
             }
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            Text("商品名", fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+            Text("個数", fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+            Text("賞味期限", fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -90,7 +108,6 @@ fun EditFoodScreen(
                     TextField(
                         value = item.name,
                         onValueChange = { editedItems[index] = item.copy(name = it) },
-                        label = { Text("名前") },
                         modifier = Modifier.weight(1.5f)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
@@ -100,18 +117,26 @@ fun EditFoodScreen(
                             val newVal = it.toIntOrNull() ?: 1
                             editedItems[index] = item.copy(quantity = newVal)
                         },
-                        label = { Text("個数") },
+//                        label = { Text("個数") },
                         modifier = Modifier.weight(1f)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     TextField(
                         value = item.expireDate,
                         onValueChange = { input ->
-                            if (Regex("""\d{0,2}/\d{0,2}""").matches(input)) {
-                                editedItems[index] = item.copy(expireDate = input)
+                            var newInput = input
+
+                            // 4桁ぴったり数字が入力された時だけ MM/DD に整形
+                            if (Regex("""^\d{4}$""").matches(newInput)) {
+                                newInput = newInput.substring(0, 2) + "/" + newInput.substring(2, 4)
+                            }
+
+                            // 入力途中（0〜2桁 + / + 0〜2桁）は許可
+                            if (inputRegex.matches(newInput)) {
+                                editedItems[index] = item.copy(expireDate = newInput)
                             }
                         },
-                        label = { Text("賞味期限mm/dd") },
+//                        label = { Text("賞味期限mm/dd") },
                         modifier = Modifier.weight(1.5f)
                     )
                     IconButton(onClick = { editedItems.removeAt(index) }) {
@@ -137,41 +162,60 @@ fun EditFoodScreen(
 
             Button(
                 onClick = {
-                    val client = OkHttpClient()
-                    val jsonArray = JSONArray()
-                    tempItems.forEach { item ->
-                        val jsonObj = org.json.JSONObject().apply {
-                            put("name", item.name)
-                            put("quantity", item.quantity)
-                            put("expireDate", item.expireDate)
-                        }
-                        jsonArray.put(jsonObj)
-                    }
+                    // 保存時の厳格チェック（MM/DD 必須）
+                    val nameInvalid = tempItems.any { it.name.isBlank() }
+                    val invalid = tempItems.any { it.expireDate.isNotBlank() && !strictMmDdRegex.matches(it.expireDate) }
 
-                    val json = jsonArray.toString()
-                    val requestBody = json.toRequestBody("application/json".toMediaTypeOrNull())
-//                    Log.e("API", "送信データ: $json")
-                    val request = Request.Builder()
-                        .url(serverUrl)
-                        .post(requestBody)
-                        .build()
-                    client.newCall(request).enqueue(object : Callback {
-                        override fun onFailure(call: Call, e: IOException) {
-                            Log.e("API", "POST失敗: ${e.message}")
+                    when {
+                        nameInvalid -> {
+                            Toast.makeText(
+                                navController.context,
+                                "保存エラー: 食材名が空欄のものがあります",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
-                        override fun onResponse(call: Call, response: Response) {
-                            Log.d("API", "POST成功: ${response.body?.string()}")
+                        invalid -> {
+                            Toast.makeText(
+                                navController.context,
+                                "保存エラー: 賞味期限は MM/DD 形式（例: 01/01）で入力してください",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
-                    })
+                        else -> {
+                            val client = OkHttpClient()
+                            val jsonArray = JSONArray()
+                            tempItems.forEach { item ->
+                                val jsonObj = org.json.JSONObject().apply {
+                                    put("name", item.name)
+                                    put("quantity", item.quantity)
+                                    put("expireDate", item.expireDate)
+                                }
+                                jsonArray.put(jsonObj)
+                            }
 
-                    fridgeViewModel.addFoodItems(tempItems.toList())
-                    Handler(Looper.getMainLooper()).post {
-                        navController.navigate("inventory")
+                            val json = jsonArray.toString()
+                            val requestBody = json.toRequestBody("application/json".toMediaTypeOrNull())
+                            val request = Request.Builder()
+                                .url(serverUrl)
+                                .post(requestBody)
+                                .build()
+                            client.newCall(request).enqueue(object : Callback {
+                                override fun onFailure(call: Call, e: IOException) {
+                                    Log.e("API", "POST失敗: ${e.message}")
+                                }
+                                override fun onResponse(call: Call, response: Response) {
+                                    Log.d("API", "POST成功: ${response.body?.string()}")
+                                } })
+
+                            fridgeViewModel.addFoodItems(tempItems.toList())
+                            Handler(Looper.getMainLooper()).post {
+                                navController.navigate("inventory")
+                            }
+                        }
                     }
                 },
-            ) {
-                Text("冷蔵庫に入れる")
-            }
+            ) { Text("冷蔵庫に入れる") }
+
         }
 
     }
