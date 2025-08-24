@@ -23,6 +23,8 @@ import com.example.fridgemate.BuildConfig
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.ui.graphics.Color
+import org.json.JSONException
+import org.json.JSONObject
 
 private const val serverUrl = BuildConfig.SERVER_URL + "/get_food_items"
 private const val deleteUrl = BuildConfig.SERVER_URL + "/delete_food_item"
@@ -39,61 +41,37 @@ fun InventoryScreen(navController: NavController) {
     val tabTitles = listOf("冷蔵庫")
     var foodItems by remember { mutableStateOf(listOf<FoodItem>()) }
 
-    // APIから食材リストを取得
-    LaunchedEffect(Unit) {
-        val client = OkHttpClient()
-        val request = Request.Builder()
-            .url(serverUrl)
-            .build()
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                // エラー処理（必要ならログ出力）
-            }
-            override fun onResponse(call: Call, response: Response) {
-                response.body?.string()?.let { body ->
-                    val jsonArray = JSONArray(body)
-                    val items = mutableListOf<FoodItem>()
-                    for (i in 0 until jsonArray.length()) {
-                        val obj = jsonArray.getJSONObject(i)
-                        items.add(
-                            FoodItem(
-                                ingredients = obj.optString("ingredients", ""),
-                                expiration_date = obj.optString("expiration_date", ""), // ここを修正
-                                quantity = obj.optInt("quantity", 0)
-                            )
-                        )
-                    }
-                    Handler(Looper.getMainLooper()).post {
-                        foodItems = items
-                    }
-                }
-            }
-        })
-    }
-
     fun fetchFoodItems() {
         val client = OkHttpClient()
         val request = Request.Builder()
             .url(serverUrl)
             .build()
         client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {}
+            override fun onFailure(call: Call, e: IOException) {
+                // 必要ならエラーログ
+            }
             override fun onResponse(call: Call, response: Response) {
                 response.body?.string()?.let { body ->
-                    val jsonArray = JSONArray(body)
-                    val items = mutableListOf<FoodItem>()
-                    for (i in 0 until jsonArray.length()) {
-                        val obj = jsonArray.getJSONObject(i)
-                        items.add(
-                            FoodItem(
-                                ingredients = obj.getString("ingredients"),
-                                expiration_date = obj.getString("expiration_date"),
-                                quantity = obj.getInt("quantity")
+                    try {
+                        val jsonArray = JSONArray(body)
+                        val items = mutableListOf<FoodItem>()
+                        for (i in 0 until jsonArray.length()) {
+                            val obj = jsonArray.getJSONObject(i)
+                            items.add(
+                                FoodItem(
+                                    ingredients = obj.optString("ingredients", ""),
+                                    expiration_date = obj.optString("expiration_date", ""),
+                                    quantity = obj.optInt("quantity", 0)
+                                )
                             )
-                        )
-                    }
-                    Handler(Looper.getMainLooper()).post {
-                        foodItems = items
+                        }
+                        Handler(Looper.getMainLooper()).post {
+                            foodItems = items
+                        }
+                    } catch (e: JSONException) {
+                        val errorObj = JSONObject(body)
+                        val errorMsg = errorObj.optString("error", "不明なエラー")
+                        // 必要ならここでエラー表示やログ出力
                     }
                 }
             }
