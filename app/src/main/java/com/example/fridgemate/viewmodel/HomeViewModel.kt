@@ -4,6 +4,11 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import com.example.fridgemate.api.RecipeApi
 import com.example.fridgemate.api.RecipeItem
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import org.json.JSONArray
 
 class HomeViewModel : ViewModel() {
     private val _recipes = mutableStateListOf<RecipeItem>()
