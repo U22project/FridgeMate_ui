@@ -57,9 +57,9 @@ fun InventoryScreen(navController: NavController) {
                         val obj = jsonArray.getJSONObject(i)
                         items.add(
                             FoodItem(
-                                ingredients = obj.getString("ingredients"),
-                                expiration_date = obj.getString("expiration_date"),
-                                quantity = obj.getInt("quantity")
+                                ingredients = obj.optString("ingredients", ""),
+                                expiration_date = obj.optString("expiration_date", ""), // ここを修正
+                                quantity = obj.optInt("quantity", 0)
                             )
                         )
                     }
