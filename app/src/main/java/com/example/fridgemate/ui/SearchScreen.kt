@@ -65,9 +65,9 @@ fun SearchScreen(navController: NavController) {
                 .padding(16.dp)
                 .fillMaxSize()
         ) {
-            Text("冷蔵庫を基にレシピを検索", style = MaterialTheme.typography.headlineMedium)
+            Text("冷蔵庫から探す", style = MaterialTheme.typography.headlineMedium)
             Spacer(modifier = Modifier.height(10.dp))
-            Text("レシピ結果▼", fontWeight = FontWeight.Bold)
+            Text("レシピ一覧▼", fontWeight = FontWeight.Bold)
 
             Spacer(modifier = Modifier.height(16.dp))
 
