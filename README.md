@@ -10,17 +10,18 @@ U-22プログラミングコンテスト2025 出展作品。
 - Kotlin 1.9.20
 - Android Gradle Plugin 8.6.0
 - minSdk 26 / targetSdk 35
-- 
+
 ## 動作環境
 - 動作確認端末: Pixel 6a (Android 16)
 
 ## ビルド方法
 1. Android Studio で本プロジェクトを開く
-2. local.properties に SERVER_URL=yur-server-url/ を追記
-   サーバーURLはバックエンド起動時に表示されます。例）http://192.168.50.77:5000/
+2. local.propertiesに以下を追記
+    SERVER_URL=your-server-url/
+    サーバーURLはバックエンド起動時に表示されます。例）http://192.168.50.77:5000/
 3. local.properties に以下を追記
-   BASE_URL = https://app.rakuten.co.jp/services/api/Recipe/CategoryRanking/20170426
-   APP_ID = 1081684173276999312
+    BASE_URL = https://app.rakuten.co.jp/services/api/Recipe/CategoryRanking/20170426
+    APP_ID = 1081684173276999312
 4. Gradle Sync を実行 
 5. Run でビルド・インストール可能
 
