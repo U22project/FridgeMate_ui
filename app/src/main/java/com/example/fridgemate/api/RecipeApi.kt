@@ -1,10 +1,10 @@
 package com.example.fridgemate.api
 
-import android.util.Log
 import okhttp3.*
 import org.json.JSONObject
 import java.io.IOException
-import kotlin.math.log
+import com.example.fridgemate.BuildConfig
+
 
 data class RecipeItem(
     val title: String,
@@ -12,10 +12,10 @@ data class RecipeItem(
     val recipeUrl: String
 )
 
+
 object RecipeApi {
-    private const val BASE_URL =
-        "https://app.rakuten.co.jp/services/api/Recipe/CategoryRanking/20170426"
-    private const val APP_ID = "1081684173276999312" // ← 自分のキーに差し替える
+    private const val BASE_URL = BuildConfig.BASE_URL
+    private const val APP_ID = BuildConfig.APP_ID
 
     private val client = OkHttpClient()
 

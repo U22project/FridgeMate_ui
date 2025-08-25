@@ -13,13 +13,31 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
+
         val serverUrl = project.rootProject.file("local.properties").readLines()
             .find { it.startsWith("SERVER_URL") }
             ?.split("=")
             ?.get(1)
             ?.trim()
         buildConfigField("String", "SERVER_URL", "\"$serverUrl\"")
+
+        val baseUrl = project.rootProject.file("local.properties").readLines()
+            .find { it.startsWith("BASE_URL") }
+            ?.split("=")
+            ?.get(1)
+            ?.trim()
+        buildConfigField("String", "BASE_URL", "\"$baseUrl\"")
+
+        val appId = project.rootProject.file("local.properties").readLines()
+            .find { it.startsWith("APP_ID") }
+            ?.split("=")
+            ?.get(1)
+            ?.trim()
+        buildConfigField("String", "APP_ID", "\"$appId\"")
+
+
         }
+
 
     buildFeatures {
         compose = true

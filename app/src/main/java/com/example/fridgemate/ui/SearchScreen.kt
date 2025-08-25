@@ -28,8 +28,9 @@ import java.io.IOException
 
 private const val foodUrl = BuildConfig.SERVER_URL + "/get_food_items"
 private const val categoryUrl = BuildConfig.SERVER_URL + "/get_recipe_categories"
-private const val recipeSearchUrl = "https://app.rakuten.co.jp/services/api/Recipe/CategoryRanking/20170426"
-private const val applicationId = "1081684173276999312"
+private const val recipeSearchUrl = BuildConfig.BASE_URL
+private const val applicationId = BuildConfig.APP_ID
+
 
 @Composable
 fun SearchScreen(navController: NavController) {
