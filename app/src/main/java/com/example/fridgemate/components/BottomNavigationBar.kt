@@ -24,7 +24,7 @@ sealed class BottomNavItem(
     @DrawableRes val iconRes: Int? = null
 ) {
     object Home      : BottomNavItem("home", "ホーム", Icons.Default.Home)
-    object Search    : BottomNavItem("search", "検索", Icons.Default.Search)
+    object Search    : BottomNavItem("search", "レシピ", iconRes = R.drawable.menu_icon)
     object AddFridge : BottomNavItem("CameraScreen", "追加", Icons.Default.AddCircle)
     object Config    : BottomNavItem("shopping", "メモ", Icons.Default.Menu)
 

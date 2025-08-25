@@ -24,6 +24,9 @@ import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONArray
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
+import com.example.fridgemate.R
 
 // --- データクラス ---
 data class ExpiringFood(val name: String, val expire_date: String)
@@ -71,9 +74,14 @@ fun HomeScreen(
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
+//                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                Image(
+                    painter = painterResource(id = R.drawable.icon), // ロゴ画像のリソースIDに置き換えてください
+                    contentDescription = "App Logo",
+                    modifier = Modifier.size(40.dp) // サイズを調整
+                )
                 Text(
                     text = "FridgeMate",
                     fontSize = 24.sp,

@@ -124,11 +124,11 @@ private fun PermissionRequestUI(onRequest: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text("カメラの使用を許可してください")
+        Text("アプリの設定からカメラの使用を許可してください")
         Spacer(modifier = Modifier.height(8.dp))
-        Button(onClick = onRequest) {
-            Text("パーミッションを許可する")
-        }
+//        Button(onClick = onRequest) {
+//            Text("パーミッションを許可する")
+//        }
     }
 }
 
