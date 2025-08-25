@@ -129,21 +129,39 @@ fun HomeScreen(
                     .fillMaxSize()
                     .padding(16.dp)
             ) {
-                items(expiringFoods) { food ->
-                    Surface(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(80.dp)
-                            .padding(vertical = 4.dp),
-                        shape = RoundedCornerShape(8.dp),
-                        tonalElevation = 1.dp
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(8.dp),
-                            verticalArrangement = Arrangement.Center
+                if (expiringFoods.isEmpty()) {
+                    item {
+                        Text(
+                            text = "急いで使う食材はないようです。\nレシピを探してみませんか？",
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.padding(16.dp),
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 14.sp
+
+                        )
+                    }
+                } else {
+                    items(expiringFoods) { food ->
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(80.dp)
+                                .padding(vertical = 4.dp),
+                            shape = RoundedCornerShape(8.dp),
+                            tonalElevation = 1.dp
                         ) {
-                            Text(food.name, fontWeight = FontWeight.Bold)
-                            Text(food.expire_date, fontSize = 14.sp, color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.SemiBold)
+                            Column(
+                                modifier = Modifier.padding(8.dp),
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Text(food.name, fontWeight = FontWeight.Bold)
+                                Text(
+                                    food.expire_date,
+                                    fontSize = 14.sp,
+                                    color = MaterialTheme.colorScheme.error,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
                         }
                     }
                 }
