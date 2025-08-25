@@ -114,8 +114,12 @@ fun EditFoodScreen(
                     TextField(
                         value = item.quantity.toString(),
                         onValueChange = {
-                            val newVal = it.toIntOrNull() ?: 1
-                            editedItems[index] = item.copy(quantity = newVal)
+                            val newVal = it.toIntOrNull()
+                            if (newVal != null) {
+                                editedItems[index] = item.copy(quantity = newVal)
+                            } else if (it.isEmpty()) {
+                                editedItems[index] = item.copy(quantity = 0) // 空の場合は 0 に設定
+                            }
                         },
 //                        label = { Text("個数") },
                         modifier = Modifier.weight(1f)
@@ -182,6 +186,12 @@ fun EditFoodScreen(
                             ).show()
                         }
                         else -> {
+                            // 個数が 0 の場合 1 を設定
+                            tempItems.forEachIndexed { index, item ->
+                                if (item.quantity == 0) {
+                                    tempItems[index] = item.copy(quantity = 1)
+                                }
+                            }
                             val client = OkHttpClient()
                             val jsonArray = JSONArray()
                             tempItems.forEach { item ->
