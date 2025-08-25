@@ -56,8 +56,8 @@ fun EditFoodScreen(
 
 
     Column(modifier = modifier.fillMaxSize().padding(16.dp)) {
-        Text("ViewModelの中身: ${tempItems.joinToString()}", style = MaterialTheme.typography.bodySmall)
-        Text("抽出された食材を編集", style = MaterialTheme.typography.titleMedium)
+//        Text("ViewModelの中身: ${tempItems.joinToString()}", style = MaterialTheme.typography.bodySmall)
+        Text("食材を編集", style = MaterialTheme.typography.titleMedium)
 
         Row(
             verticalAlignment = Alignment.CenterVertically,

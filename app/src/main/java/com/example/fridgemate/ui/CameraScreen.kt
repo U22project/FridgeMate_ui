@@ -148,7 +148,7 @@ private fun CameraScreenContent(
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            Text("OCR結果:", style = MaterialTheme.typography.titleMedium)
+//            Text("OCR結果:", style = MaterialTheme.typography.titleMedium)
             Text(ocrResult, modifier = Modifier.padding(vertical = 8.dp))
             Row (
                 modifier = Modifier
@@ -233,7 +233,7 @@ private fun takePictureAndProcess(
                 Toast.makeText(context, "撮影成功: ${photoFile.name}", Toast.LENGTH_SHORT).show()
             }
             override fun onError(exception: ImageCaptureException) {
-                Toast.makeText(context, "撮影失敗: ${exception.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "撮影失敗: もう一度やり直してください", Toast.LENGTH_SHORT).show()
             }
         }
     )
