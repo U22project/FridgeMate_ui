@@ -34,7 +34,7 @@ object RecipeApi {
 
                 val json = JSONObject(response.body?.string() ?: "")
                 val recipes = json.getJSONArray("result")
-                Log.e(String.toString(), "APIレスポンス: ${recipes ?: "null"}")
+
                 for (i in 0 until recipes.length()) {
                     val item = recipes.getJSONObject(i)
                     result.add(
