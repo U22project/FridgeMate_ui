@@ -33,8 +33,6 @@ private const val applicationId = "1081684173276999312"
 
 @Composable
 fun SearchScreen(navController: NavController) {
-    var selectedTab by remember { mutableStateOf(0) }
-    val tabTitles = listOf("冷蔵庫")
     var foodItems by remember { mutableStateOf(listOf<String>()) }
     var categoryMap by remember { mutableStateOf(mapOf<String, String>()) }
     var recipeResults by remember { mutableStateOf(listOf<RecipeItem>()) }
@@ -44,25 +42,8 @@ fun SearchScreen(navController: NavController) {
         fetchRecipeCategories { map -> categoryMap = map }
     }
 
-    Scaffold { innerPadding ->
-        Column(
-            modifier = Modifier
-                .padding(innerPadding)
-                .padding(16.dp)
-                .fillMaxSize()
-        ) {
-            TabRow(selectedTabIndex = selectedTab) {
-                tabTitles.forEachIndexed { index, title ->
-                    Tab(
-                        selected = selectedTab == index,
-                        onClick = { selectedTab = index },
-                        text = { Text(title) }
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
+    Scaffold(
+        bottomBar = {
             Button(
                 onClick = {
                     val matchedCategoryIds = matchRandomCategoriesByFood(foodItems, categoryMap)
@@ -70,35 +51,30 @@ fun SearchScreen(navController: NavController) {
                         recipeResults = results
                     }
                 },
-                modifier = Modifier.align(Alignment.CenterHorizontally)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
             ) {
                 Text("レシピを検索")
             }
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .padding(innerPadding)
+                .padding(16.dp)
+                .fillMaxSize()
+        ) {
+            Text("冷蔵庫を基にレシピを検索", style = MaterialTheme.typography.headlineMedium)
+            Spacer(modifier = Modifier.height(10.dp))
+            Text("レシピ結果▼", fontWeight = FontWeight.Bold)
 
             Spacer(modifier = Modifier.height(16.dp))
 
             LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(foodItems) { food ->
-                    Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(8.dp),
-                        tonalElevation = 1.dp
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .padding(12.dp)
-                                .fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(food, fontWeight = FontWeight.SemiBold)
-                            Text("\uD83E\uDD6C", fontSize = 20.sp)
-                        }
-                    }
-                }
-
                 item {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text("\uD83D\uDD3D レシピ結果 \uD83D\uDD3D", fontWeight = FontWeight.Bold)
+                    Spacer(modifier = Modifier.height(8.dp))
+
                 }
 
                 items(recipeResults) { recipe ->
@@ -155,7 +131,10 @@ fun fetchFoodItems(onResult: (List<String>) -> Unit) {
                 try {
                     val jsonArray = JSONArray(body)
                     for (i in 0 until jsonArray.length()) {
-                        items.add(jsonArray.getString(i))
+                        val obj = jsonArray.getJSONObject(i)
+                        val ingredient = obj.getString("ingredients")
+                        val quantity = obj.getString("quantity")
+                        items.add("$ingredient x$quantity")
                     }
                 } catch (e: Exception) {
                     println("❌ JSONエラー: ${e.message}")
